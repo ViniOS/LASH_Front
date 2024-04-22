@@ -1,5 +1,6 @@
 import CustomTable from './CustomTable';
 import PacienteAdd from './FormAdd/PacienteAdd';
+import ResponsavelAdd from './FormAdd/ResponsavelAdd';
 
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
