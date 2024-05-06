@@ -1,6 +1,8 @@
 import CustomTable from './CustomTable';
 import PacienteAdd from './FormAdd/PacienteAdd';
 import ResponsavelAdd from './FormAdd/ResponsavelAdd';
+import FrequenciaAdd from './FormAdd/FrequenciaAdd';
+import DoencaAdd from './FormAdd/DoencaAdd';
 
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
@@ -20,7 +22,7 @@ function Search({entity, columns}){
     const [formAddString, setformAddString] = useState(entity);
 
     let formAddRender = null;
-    let title = '';
+    let title = ''; 
 
     useEffect(() => {
         handleSearch();
