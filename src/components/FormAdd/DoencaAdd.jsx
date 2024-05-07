@@ -59,12 +59,12 @@ function DoencaAdd({ id, onSearch }){
                 <div className="flex flex-wrap -mx-3 mb-6">
                     {showTitle && (
                         <div className='my-8'>
-                            <h1 className='text-sky-600 font-bold text-center text-2xl'>Adicionar Doença</h1>
+                            <h1 className='text-red-700 font-bold text-center text-2xl'>Adicionar Doença</h1>
                         </div>   
                     )}
                     {!showTitle && (
                         <div className='my-8'>
-                            <h1 className='text-sky-600 font-bold text-center text-2xl'>Editar Doença</h1>
+                            <h1 className='text-red-700 font-bold text-center text-2xl'>Editar Doença</h1>
                         </div>   
                     )}                      
                     <div className="w-full">
@@ -75,7 +75,7 @@ function DoencaAdd({ id, onSearch }){
                     </div>
                 </div>
                 <div className="mx-auto">
-                    <button onClick={() => handleSubmit(doenca)} className="rounded-full border-2 border-sky-600 text-sky-600 p-1.5 px-4">Enviar</button>
+                    <button onClick={() => handleSubmit(doenca)} className="rounded-full border-2 border-red-700 text-red-700 p-1.5 px-4">Enviar</button>
                 </div>
             </form>
         </div>
