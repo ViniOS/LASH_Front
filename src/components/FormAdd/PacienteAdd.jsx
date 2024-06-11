@@ -72,6 +72,8 @@ function PacienteAdd({ id, onSearch }) {
     setBairro(d.bairro);
     setEndereco(d.endereco);
     setNumero(d.numero);
+    setUf(d.uf);
+    setCep(d.cep);
     setDoenca(d.doenca);
     setDataNascimento(d.dataNascimento);
   };
@@ -155,13 +157,14 @@ function PacienteAdd({ id, onSearch }) {
           nome: nome,
           sobrenome: sobrenome,
           cpf: cpf,
-          Cidade: cidade,
+          cidade: cidade,
           bairro: bairro,
           numero: numero,
           endereco: endereco,
           doenca: doenca,
           dataNascimento: dataNascimento,
           cep: cep,
+          uf: uf
         }),
       });
 
@@ -274,6 +277,7 @@ function PacienteAdd({ id, onSearch }) {
                 onChange={(e) => setCidade(e.target.value)}
               />
             </div>
+             {/* Campo UF */}
             <div className="w-1/4">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -283,17 +287,18 @@ function PacienteAdd({ id, onSearch }) {
               </label>
 
               <select
-                className="w-full bg-gray-200 text-gray-700 rounded p-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="input-uf"
-                value={uf}
-                onChange={(e) => setUf(e.target.value)}
-              >
-                {ufs.map((estado) => (
-                  <option key={estado} value={estado}>
-                    {estado}
-                  </option>
-                ))}
-              </select>
+              className="w-full bg-gray-200 text-gray-700 rounded p-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+              id="input-uf"
+              value={uf}
+              onChange={(e) => setUf(e.target.value)}
+            >
+              <option value=""></option>
+              {ufs.map((estado) => (
+                <option key={estado} value={estado}>
+                  {estado}
+                </option>
+              ))}
+            </select>
             </div>
           </div>
           <div className="w-full flex gap-5">
@@ -321,15 +326,20 @@ function PacienteAdd({ id, onSearch }) {
               >
                 CEP
               </label>
-              <input
+              <InputMask      
+                mask="99999-999"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
                 className="appearance-none w-full bg-gray-200 text-gray-700 rounded p-3 mb-3 leading-tight focus:outline-none focus:bg-white"
                 id="input-cep"
                 type="text"
                 placeholder=""
-                value={cep}
-                onChange={(e) => setCep(e.target.value)}
-              />
-            </div>
+
+                />
+            {errors.cep && (
+              <p className="text-red-500 text-xs italic">{errors.cep}</p>
+            )}
+          </div>
           </div>
           <div className="w-full flex gap-5">
             <div className="w-full">
@@ -391,13 +401,14 @@ function PacienteAdd({ id, onSearch }) {
             >
               Data de nascimento
             </label>
-            <input
+            <InputMask
+              mask="9999/99/99"
+              value={dataNascimento}
+              onChange={(e) => setDataNascimento(e.target.value)}
               className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
               id="input-data"
               type="text"
-              placeholder="DD/MM/AAAA"
-              value={dataNascimento}
-              onChange={(e) => setDataNascimento(e.target.value)}
+              placeholder="AAAA/MM/DD"
             />
             {errors.dataNascimento && (
               <p className="text-red-500">{errors.dataNascimento}</p>
