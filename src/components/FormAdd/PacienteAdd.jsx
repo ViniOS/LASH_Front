@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import InputMask from "react-input-mask";
 import validator from "validator";
-import "react-datepicker/dist/react-datepicker.css"; // Importando CSS do DatePicker
+import "react-datepicker/dist/react-datepicker.css";
 
 function PacienteAdd({ id, onSearch }) {
   const [nome, setNome] = useState("");
@@ -9,6 +9,22 @@ function PacienteAdd({ id, onSearch }) {
   const [cpf, setCpf] = useState("");
   const [cidade, setCidade] = useState("");
   const [cep, setCep] = useState("");
+  const [uf, setUf] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [numero, setNumero] = useState("");
+  const [doenca, setDoenca] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
+  const [showTitle, setShowTitle] = useState("");
+  const [errors, setErrors] = useState({
+    nome: "",
+    sobrenome: "",
+    cpf: "",
+    dataNascimento: "",
+  });
+
+  const [doencas, setDoencas] = useState([]);
+
   const ufs = [
     "AC",
     "AL",
@@ -38,19 +54,6 @@ function PacienteAdd({ id, onSearch }) {
     "SE",
     "TO",
   ];
-  const [uf, setUf] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [endereco, setEndereco] = useState("");
-  const [numero, setNumero] = useState("");
-  const [doenca, setDoenca] = useState("");
-  const [dataNascimento, setDataNascimento] = useState(null); // Data inicial como null
-  const [showTitle, setShowTitle] = useState(false);
-  const [errors, setErrors] = useState({
-    nome: "",
-    sobrenome: "",
-    cpf: "",
-    dataNascimento: "",
-  });
 
   useEffect(() => {
     if (id !== "") {
@@ -59,23 +62,36 @@ function PacienteAdd({ id, onSearch }) {
     } else {
       setShowTitle(true);
     }
+    
+    // Fetch das doenças
+    fetch('http://localhost:3000/doencas')
+      .then(response => response.json())
+      .then(data => {
+        // Mapeia os dados recebidos e seta no estado doencas
+        if (Array.isArray(data)) {
+          setDoencas(data); // Define os dados das doenças no estado
+          if (data.length > 0) {
+            setDoenca(data[0].nome); // Define a primeira doença como padrão
+          }
+        } else {
+          console.error('Os dados recebidos não são um array:', data);
+        }
+      })
+      .catch(error => console.error('Erro ao buscar doenças:', error));
   }, []);
 
   const updateValues = (data) => {
-    console.log(data);
-
-    let d = data;
-    setNome(d.nome);
-    setSobrenome(d.sobrenome);
-    setCpf(d.cpf);
-    setCidade(d.cidade);
-    setBairro(d.bairro);
-    setEndereco(d.endereco);
-    setNumero(d.numero);
-    setUf(d.uf);
-    setCep(d.cep);
-    setDoenca(d.doenca);
-    setDataNascimento(d.dataNascimento);
+    setNome(data.nome);
+    setSobrenome(data.sobrenome);
+    setCpf(data.cpf);
+    setCidade(data.cidade);
+    setBairro(data.bairro);
+    setEndereco(data.endereco);
+    setNumero(data.numero);
+    setUf(data.uf);
+    setCep(data.cep);
+    setDoenca(data.doenca);
+    setDataNascimento(data.dataNascimento);
   };
 
   const handleSubmit = async (e) => {
@@ -88,42 +104,32 @@ function PacienteAdd({ id, onSearch }) {
     };
     let hasErrors = false;
 
-    // Função para remover caracteres não numéricos
     const onlyNumbers = (str) => str.replace(/\D/g, "");
     const cpfNumeros = onlyNumbers(cpf);
 
-    // Validação do nome
     if (nome.length < 2) {
       formErrors.nome = "O nome deve ter pelo menos 2 caracteres.";
       hasErrors = true;
     }
 
-    //Validação do sobrenome
     if (!/^[a-zA-Z\s-]+$/.test(sobrenome) || /\d/.test(sobrenome)) {
       formErrors.sobrenome = "O sobrenome deve conter apenas letras e espaços.";
       hasErrors = true;
     }
 
-    // Validação do CPF
     if (!validator.isNumeric(cpfNumeros) || cpfNumeros.length !== 11) {
       formErrors.cpf = "CPF inválido. Digite apenas números.";
       hasErrors = true;
     }
 
     const validateDateSimple = (value) => {
-      // Expressão regular para data no formato DD/MM/YYYY
       const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-
-      // Validação
       if (!regex.test(value)) {
         return "Formato de data inválido (DD/MM/AAAA)";
       }
-
-      // Data válida
       return true;
     };
 
-    // Validação data
     const dataValida = validateDateSimple(dataNascimento);
     if (dataValida !== true) {
       formErrors.dataNascimento = dataValida;
@@ -135,7 +141,6 @@ function PacienteAdd({ id, onSearch }) {
       return;
     }
 
-    // Aqui continua o código para envio do formulário se não houver erros
     let url = "";
     let method = "";
 
@@ -164,14 +169,15 @@ function PacienteAdd({ id, onSearch }) {
           doenca: doenca,
           dataNascimento: dataNascimento,
           cep: cep,
-          uf: uf
+          uf: uf,
         }),
       });
 
       if (response.ok) {
         console.log("Dados enviados com sucesso!");
       } else {
-        console.log("Erro ao enviar os dados:", response.statusText);
+        const errorData = await response.json();
+        console.log("Erro ao enviar os dados:", errorData);
         setErrors({
           geral: "Erro ao enviar os dados. Por favor, tente novamente.",
         });
@@ -200,7 +206,6 @@ function PacienteAdd({ id, onSearch }) {
               </h1>
             </div>
           )}
-          {/* Campo de nome */}
           <div className="w-full">
             <label
               className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -212,13 +217,11 @@ function PacienteAdd({ id, onSearch }) {
               className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
               id="input-nome"
               type="text"
-              placeholder=""
               value={nome}
               onChange={(e) => setNome(e.target.value)}
             />
             {errors.nome && <p className="text-red-500">{errors.nome}</p>}
           </div>
-          {/* Campo de sobrenome */}
           <div className="w-full">
             <label
               className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -230,7 +233,6 @@ function PacienteAdd({ id, onSearch }) {
               className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               id="input-sobrenome"
               type="text"
-              placeholder=""
               value={sobrenome}
               onChange={(e) => setSobrenome(e.target.value)}
             />
@@ -238,7 +240,6 @@ function PacienteAdd({ id, onSearch }) {
               <p className="text-red-500">{errors.sobrenome}</p>
             )}
           </div>
-          {/* Campo de CPF */}
           <div className="w-full">
             <label
               className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -258,102 +259,67 @@ function PacienteAdd({ id, onSearch }) {
               <p className="text-red-500 text-xs italic">{errors.cpf}</p>
             )}
           </div>
-          {/* Campo Cidade */}
           <div className="w-full flex gap-5">
-            <div className="w-full">
+            <div className="w-1/2">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="input-cidade"
+                htmlFor="input-dataNascimento"
               >
-                Cidade
+                Data de Nascimento
               </label>
-
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="input-cidade"
+              <InputMask
+                mask="99/99/9999"
+                value={dataNascimento}
+                onChange={(e) => setDataNascimento(e.target.value)}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="input-dataNascimento"
                 type="text"
-                placeholder=""
-                value={cidade}
-                onChange={(e) => setCidade(e.target.value)}
               />
+              {errors.dataNascimento && (
+                <p className="text-red-500 text-xs italic">
+                  {errors.dataNascimento}
+                </p>
+              )}
             </div>
-            <div className="w-1/4">
+            <div className="w-1/2">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="input-uf"
+                htmlFor="input-doenca"
               >
-                UF
+                Doença
               </label>
-
               <select
-  className="w-full bg-gray-200 text-gray-700 rounded p-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-  id="input-uf"
-  value={uf}
-  onChange={(e) => setUf(e.target.value)}
->
-  <option value=""></option>
-  {ufs.map((estado) => (
-    <option key={estado} value={estado}>
-      {estado}
-    </option>
-  ))}
-</select>
+                className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                id="input-doenca"
+                value={doenca}
+                onChange={(e) => setDoenca(e.target.value)} // Alterado para setar uma string simples
+              >
+                <option value="">Selecione uma doença</option>
+                {doencas.map((doencaOption, index) => (
+                  <option key={index} value={doencaOption.nome}>
+                    {doencaOption.nome}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-          <div className="w-full flex gap-5">
-            <div className="w-full">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="input-bairro"
-              >
-                Bairro
-              </label>
-
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="input-bairro"
-                type="text"
-                placeholder=""
-                value={bairro}
-                onChange={(e) => setBairro(e.target.value)}
-              />
-            </div>
-            <div className="w-1/4">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="input-cep"
-              >
-                CEP
-              </label>
-              <input
-                className="appearance-none w-full bg-gray-200 text-gray-700 rounded p-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="input-cep"
-                type="text"
-                placeholder=""
-                value={cep}
-                onChange={(e) => setCep(e.target.value)}
-              />
-            </div>
+          <div className="w-full">
+            <label
+              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+              htmlFor="input-endereco"
+            >
+              Endereço
+            </label>
+            <input
+              className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="input-endereco"
+              type="text"
+              value={endereco}
+              onChange={(e) => setEndereco(e.target.value)}
+            />
           </div>
           <div className="w-full flex gap-5">
-            <div className="w-full">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="input-endereco"
-              >
-                Endereço
-              </label>
-
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="input-endereco"
-                type="text"
-                placeholder=""
-                value={endereco}
-                onChange={(e) => setEndereco(e.target.value)}
-              />
-            </div>
-            <div className="w-1/4">
+            <div className="w-1/3">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="input-numero"
@@ -361,62 +327,99 @@ function PacienteAdd({ id, onSearch }) {
                 Número
               </label>
               <input
-                className="appearance-none w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 id="input-numero"
                 type="text"
-                placeholder=""
                 value={numero}
                 onChange={(e) => setNumero(e.target.value)}
               />
             </div>
+            <div className="w-1/3">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                htmlFor="input-cep"
+              >
+                CEP
+              </label>
+              <InputMask
+                mask="99999-999"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="input-cep"
+                type="text"
+              />
+            </div>
+            <div className="w-1/3">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                htmlFor="input-uf"
+              >
+                UF
+              </label>
+              <select
+                value={uf}
+                onChange={(e) => setUf(e.target.value)}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="input-uf"
+              >
+                <option value="" disabled>
+                  Selecione a UF
+                </option>
+                {ufs.map((estado) => (
+                  <option key={estado} value={estado}>
+                    {estado}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-
-          <div className="w-full">
-            <label
-              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-              htmlFor="input-doenca"
+          <div className="w-full flex gap-5 mt-4">
+            <div className="w-1/2">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                htmlFor="input-cidade"
+              >
+                Cidade
+              </label>
+              <input
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="input-cidade"
+                type="text"
+                value={cidade}
+                onChange={(e) => setCidade(e.target.value)}
+              />
+            </div>
+            <div className="w-1/2">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                htmlFor="input-bairro"
+              >
+                Bairro
+              </label>
+              <input
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="input-bairro"
+                type="text"
+                value={bairro}
+                onChange={(e) => setBairro(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="w-full flex justify-center mt-6">
+            <button
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              type="submit"
+              onClick={handleSubmit}
             >
-              Doença
-            </label>
-            <input
-              className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-              id="input-doenca"
-              type="text"
-              placeholder=""
-              value={doenca}
-              onChange={(e) => setDoenca(e.target.value)}
-            />
+              {id === "" ? "Adicionar Paciente" : "Atualizar Paciente"}
+            </button>
           </div>
-          {/* Campo de data de nascimento */}
-          <div className="w-full">
-            <label
-              className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-              htmlFor="input-data"
-            >
-              Data de nascimento
-            </label>
-            <input
-              className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-              id="input-data"
-              type="text"
-              placeholder="DD/MM/AAAA"
-              value={dataNascimento}
-              onChange={(e) => setDataNascimento(e.target.value)}
-            />
-            {errors.dataNascimento && (
-              <p className="text-red-500">{errors.dataNascimento}</p>
-            )}
-          </div>
-        </div>
-        <div className="mx-auto">
-          <button
-            onClick={handleSubmit}
-            className="rounded-full border-2 border-red-700 text-red-800 p-1.5 px-4"
-          >
-            Enviar
-          </button>
         </div>
       </form>
+      {errors.geral && (
+        <p className="text-red-600 text-center mt-4">{errors.geral}</p>
+      )}
     </div>
   );
 }

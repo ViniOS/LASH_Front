@@ -1,177 +1,168 @@
+import React, { useState, useEffect } from 'react';
 import CustomTable from './CustomTable';
 import PacienteAdd from './FormAdd/PacienteAdd';
 import ResponsavelAdd from './FormAdd/ResponsavelAdd';
 import FrequenciaAdd from './FormAdd/FrequenciaAdd';
 import DoencaAdd from './FormAdd/DoencaAdd';
-
-import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function Search({entity, columns}){
+function Search({ entity, columns }) {
+  const [searchValue, setSearchValue] = useState('');
+  const [datas, setDatas] = useState([]);
+  const [showTable, setShowTable] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [showFormEdit, setShowFormEdit] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState('');
 
-    const [searchValue, setSearchValue] = useState('');
-    const [datas, setData] = useState([]);
-    const [showTable, setShowTable] = useState(true); 
-    const [showForm, setShowForm] = useState(false); 
-    const [showFormEdit, setShowFormEdit] = useState(false);
-    const [showToast, setShowToast] = useState(false);
-    const [selectedItemId, setSelectedItemId] = useState('');
+  useEffect(() => {
+    handleSearch();
+  }, []);
 
-    //formAdd
-    const [formAddString] = useState(entity);
+  const handleSearch = async () => {
+    let url = `http://localhost:3000/${entity}`;
 
-    let formAddRender = null;
-    let title = ''; 
+    if (searchValue !== '') {
+      url = `http://localhost:3000/${entity}/${searchValue}`;
+    }
 
-    useEffect(() => {
-        handleSearch();
-    }, []);
+    if (selectedItemId !== '') {
+      url = `http://localhost:3000/${entity}/id/${selectedItemId}`;
+    }
 
-    const handleSearch = async (callback) => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setDatas(data);
 
-        let url = `http://localhost:3000/${entity}`;
+      if (searchValue !== '') {
+        setShowToast(true);
+        toast.success('Pesquisa realizada com sucesso');
+      }
+    } catch (err) {
+      console.error(err);
+      setShowToast(true);
+      toast.error('Erro ao pesquisar');
+    }
+  };
 
-        if(searchValue != '') {
-            url = `http://localhost:3000/${entity}/${searchValue}`;
-        }
+  const handleEdit = (itemId) => {
+    setSelectedItemId(itemId);
+    setShowFormEdit(true);
+    setShowTable(false);
+  };
 
-        if(selectedItemId != '') {
-            url = `http://localhost:3000/${entity}/id/${selectedItemId}`;
-        }
+  const handleDelete = async (itemId) => {
+    let url = `http://localhost:3000/${entity}/${itemId}`;
 
-        try {
-            const response = await fetch(url);
-            const data = await response.json(); 
-            
-            setData(data);
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-            if(callback && showFormEdit){
-                callback(data);
-            }
+      const responseData = await response.json();
+      toast.success(responseData.mensagem);
 
-            if (searchValue !== '') {
-                setShowToast(true); 
-                toast.success('Pesquisa realizada com sucesso');
-            }
+      if (responseData.ok) {
+        const updatedData = datas.filter((item) => item.id !== itemId);
+        setDatas(updatedData);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao tentar deletar');
+    }
+  };
 
-        } catch (err) {
-            console.log(err);
+  const handleAdd = () => {
+    setShowTable(false);
+    setShowForm(true);
+  };
 
-            setShowToast(true);
-            toast.error('Erro ao pesquisar');
-        }
-    };
+  const handleInputChange = (event) => {
+    setSearchValue(event.target.value);
+  };
 
-    const handleEdit = (itemId) => {
-        setSelectedItemId(itemId);
-        setShowFormEdit(true);
-        setShowTable(false); 
-    };
+  let formAddRender = null;
+  let title = '';
 
-    const handleDelete = async (itemId) => {
-        let url = `http://localhost:3000/${entity}/${itemId}`;
+  switch (entity) {
+    case 'pacientes':
+      formAddRender = <PacienteAdd id={selectedItemId} onSearch={handleSearch} />;
+      title = 'Pacientes';
+      break;
+    case 'responsaveis':
+      formAddRender = <ResponsavelAdd id={selectedItemId} onSearch={handleSearch} />;
+      title = 'Responsáveis';
+      break;
+    case 'frequencias':
+      formAddRender = <FrequenciaAdd id={selectedItemId} />;
+      title = 'Frequências';
+      break;
+    case 'doencas':
+      formAddRender = <DoencaAdd id={selectedItemId} onSearch={handleSearch} />;
+      title = 'Doenças';
+      break;
+    default:
+      break;
+  }
 
-        try {
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            });
-
-            setShowToast(true);
-            const responseJson = await response.json();
-            toast.success(responseJson.mensagem);
-
-            if(responseJson.ok) {
-                const updatedData = datas.filter((item) => item.id !== itemId);
-                setData(updatedData);
-            }
-        } catch (err) {
-            setShowToast(true);
-            toast.success('Erro ao tentar deletar');
-        }
-    };
-    
-    const handleAdd = () => {
-        setShowTable(false); 
-        setShowForm(true);
-    };
-    
-    const handleInputChange = (event) => {
-        setSearchValue(event.target.value);
-    };
-
-    if(formAddString === 'pacientes') {
-        
-        formAddRender = <PacienteAdd id={selectedItemId} onSearch={handleSearch} />
-        title='Pacientes'
-    } 
-
-    if(formAddString === 'responsaveis') {
-        formAddRender = <ResponsavelAdd id={selectedItemId} onSearch={handleSearch}/>
-        title='Responsáveis'
-    } 
-
-    if(formAddString === 'frequencias') {
-        formAddRender = <FrequenciaAdd id={selectedItemId}/>
-        title='Frequências'
-    } 
-
-    if(formAddString === 'doencas') {
-        formAddRender = <DoencaAdd id={selectedItemId} onSearch={handleSearch}/>
-        title='Doenças'
-    } 
-
-    return (
-        <div className="flex flex-col justify-around w-4/5">
-            {showTable && (
-                <div className="w-full">
-                    <div className='my-12'>
-                        <h1 className='text-red-700 font-bold text-center text-2xl'>Pesquisar {title}</h1>
-                    </div>
-                    <form className="flex justify-center gap-2">
-                        <div className="flex-initial w-7/12">
-                            <input type="text" id="searchPacients" value={searchValue} onChange={handleInputChange} className="bg-red-700 border border-gray-300 text-white text-sm rounded-full focus:ring-red-700 focus:border-red-700 block w-full p-2.5" placeholder="" required />
-                        </div>
-                        <div>
-                            <button type="button" onClick={handleSearch} className="rounded-full border-2 border-red-700 text-red-700 p-1.5 px-4">Pesquisar</button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {showTable && (
-                <div className="flex justify-center">
-                    <CustomTable columns={columns} data={datas} onDelete={handleDelete} onEdit={handleEdit} />
-                </div>
-            )}
-
-            {showForm && (
-                <div className="flex justify-center">
-                    {formAddRender}
-                </div>
-            )}
-
-            {showFormEdit && selectedItemId !== '' && (
-                <div className="flex justify-center">
-                    {formAddRender}
-                </div>
-            )} 
-
-            {showToast && (
-                <ToastContainer />
-            )}
-
-            {showTable && (
-                <div className="mx-auto">
-                    <button onClick={handleAdd} className="rounded-full border-2 border-red-600 text-red-600 p-1.5 px-4">Adicionar</button>
-                </div>
-            )}
+  return (
+    <div className="flex flex-col justify-around w-4/5">
+      {showTable && (
+        <div className="w-full">
+          <div className="my-12">
+            <h1 className="text-red-700 font-bold text-center text-2xl">Pesquisar {title}</h1>
+          </div>
+          <form className="flex justify-center gap-2">
+            <div className="flex-initial w-7/12">
+              <input
+                type="text"
+                id="searchPacients"
+                value={searchValue}
+                onChange={handleInputChange}
+                className="bg-red-700 border border-gray-300 text-white text-sm rounded-full focus:ring-red-700 focus:border-red-700 block w-full p-2.5"
+                placeholder=""
+                required
+              />
+            </div>
+            <div>
+              <button type="button" onClick={handleSearch} className="rounded-full border-2 border-red-700 text-red-700 p-1.5 px-4">
+                Pesquisar
+              </button>
+            </div>
+          </form>
         </div>
-    )
-}
+      )}
 
+      {showTable && (
+        <div className="flex justify-center">
+          <CustomTable columns={columns} data={datas} onDelete={handleDelete} onEdit={handleEdit} />
+        </div>
+      )}
+
+      {showForm && (
+        <div className="flex justify-center">{formAddRender}</div>
+      )}
+
+      {showFormEdit && selectedItemId !== '' && (
+        <div className="flex justify-center">{formAddRender}</div>
+      )}
+
+      {showToast && <ToastContainer />}
+
+      {showTable && (
+        <div className="mx-auto">
+          <button onClick={handleAdd} className="rounded-full border-2 border-red-600 text-red-600 p-1.5 px-4">
+            Adicionar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Search;
