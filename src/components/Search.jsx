@@ -140,7 +140,7 @@ function Search({ entity, columns }) {
 
       {showTable && (
         <div className="flex justify-center">
-          <CustomTable columns={columns} data={datas} onDelete={handleDelete} onEdit={handleEdit} />
+          <CustomTable columns={columns} data={datas} onDelete={handleDelete} onEdit={handleEdit} entity={entity} />
         </div>
       )}
 
@@ -157,7 +157,7 @@ function Search({ entity, columns }) {
       {showTable && (
         <div className="mx-auto">
           <button onClick={handleAdd} className="rounded-full border-2 border-red-600 text-red-600 p-1.5 px-4">
-            Adicionar
+            Adicionar Novo
           </button>
         </div>
       )}
