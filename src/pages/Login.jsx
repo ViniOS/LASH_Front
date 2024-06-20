@@ -8,28 +8,30 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:3000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: username, senha: password }),
-      });
+        const response = await fetch("http://localhost:3000/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: username, senha: password }),
+        });
 
-      if (!response.ok) {
-        throw new Error("Invalid username or password");
-      }
+        if (!response.ok) {
+            throw new Error("Invalid username or password");
+        }
 
-      const { mensagem } = await response.json();
-      if (mensagem === 'Login feito com sucesso') {
-        window.location.href = "http://localhost:5173/pacientes"; // Redireciona para a página de pacientes
-      } else {
-        setError(mensagem);
-      }
+        const { mensagem, token } = await response.json();
+        if (mensagem === 'Login feito com sucesso') {
+            localStorage.setItem('token', token); // Armazenar token
+            window.location.href = "http://localhost:5173/pacientes"; // Redireciona para a página de pacientes
+        } else {
+            setError(mensagem);
+        }
     } catch (err) {
-      setError(err.message);
+        setError(err.message);
     }
-  };
+};
+
 
   const handleLogout = async () => {
     try {

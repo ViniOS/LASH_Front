@@ -20,6 +20,11 @@ function Search({ entity, columns }) {
     handleSearch();
   }, []);
 
+  // Função para obter o token JWT armazenado no localStorage
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
   const handleSearch = async () => {
     let url = `http://localhost:3000/${entity}`;
 
@@ -32,7 +37,11 @@ function Search({ entity, columns }) {
     }
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`, // Inclui o token JWT no cabeçalho Authorization
+        },
+      });
       const data = await response.json();
       setDatas(data);
 
@@ -60,6 +69,7 @@ function Search({ entity, columns }) {
       const response = await fetch(url, {
         method: 'DELETE',
         headers: {
+          Authorization: `Bearer ${getToken()}`, // Inclui o token JWT no cabeçalho Authorization
           'Content-Type': 'application/json',
         },
       });
