@@ -1,15 +1,16 @@
 import { useState } from 'react';
+import InputMask from "react-input-mask";
 
 function FrequenciaAdd({ id }){
 
-    const [pacienteID, setPacienteID] = useState('');
+    const [cpf, setCpf] = useState('');
 
     const handleSubmit = async () => {
         
         let url = '';
         let method = '';
 
-        if(id === ''){
+        if (id === '') {
             url = `http://localhost:3000/frequencias`;
             method = 'POST';
         } else {
@@ -18,15 +19,21 @@ function FrequenciaAdd({ id }){
         }
 
         try {
+            const token = localStorage.getItem('token');
+
             const response = await fetch(url, {
                 method: method,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    "pacienteId": pacienteID
+                    "cpf": cpf // Enviar o CPF ao invés do pacienteId
                 })
-            })
+            });
+
+            // Limpar o campo de CPF após o envio da requisição
+            setCpf('');
 
         } catch (err) {
             console.log(err);
@@ -42,10 +49,19 @@ function FrequenciaAdd({ id }){
                 </div>
                 <div className="flex flex-wrap -mx-3 mb-6">
                     <div className="w-full">
-                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="input-pacienteID">
-                        ID do paciente
-                    </label>
-                    <input className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="input-pacienteID" type="text" placeholder="" value={pacienteID} onChange={(e) => setPacienteID(e.target.value)}/>
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="input-cpf">
+                            CPF do paciente
+                        </label>
+                        <InputMask
+                            className="appearance-none block w-full bg-gray-200 text-gray-700 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                            id="input-cpf"
+                            type="text"
+                            placeholder="Digite o CPF"
+                            value={cpf}
+                            onChange={(e) => setCpf(e.target.value)}
+                            mask="999.999.999-99"
+                            maskChar="_"
+                        />
                     </div>
                 </div>
                 <div className="mx-auto">

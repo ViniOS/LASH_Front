@@ -35,7 +35,18 @@ function ResponsavelAdd({ id, onSearch }) {
 
   const fetchPacientes = async () => {
     try {
-      const response = await fetch("http://localhost:3000/pacientes");
+      const token = localStorage.getItem('token'); // Recupere o token de onde estiver armazenado
+  
+      const response = await fetch("http://localhost:3000/pacientes", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Inclua o token no cabeçalho da requisição
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Erro ao buscar pacientes');
+      }
+  
       const data = await response.json();
       setPacientes(data.map(paciente => ({
         ...paciente,
@@ -45,6 +56,7 @@ function ResponsavelAdd({ id, onSearch }) {
       console.error("Erro ao buscar pacientes", err);
     }
   };
+  
 
   const updateValues = (data) => {
     let d = data;

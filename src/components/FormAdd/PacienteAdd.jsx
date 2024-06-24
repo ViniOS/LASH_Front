@@ -153,10 +153,13 @@ function PacienteAdd({ id, onSearch }) {
     }
 
     try {
+      const token = localStorage.getItem('token');
+
       const response = await fetch(url, {
         method: method,
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           nome: nome,
