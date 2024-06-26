@@ -39,7 +39,8 @@ function ResponsavelAdd({ id, onSearch }) {
   
       const response = await fetch("http://localhost:3000/pacientes", {
         headers: {
-          Authorization: `Bearer ${token}`, // Inclua o token no cabeçalho da requisição
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Inclua o token no cabeçalho da requisição
         },
       });
   

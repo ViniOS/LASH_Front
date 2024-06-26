@@ -63,8 +63,14 @@ function PacienteAdd({ id, onSearch }) {
       setShowTitle(true);
     }
     
+    const token = localStorage.getItem('token')
+
     // Fetch das doenças
-    fetch('http://localhost:3000/doencas')
+    fetch('http://localhost:3000/doencas', {
+      headers:{
+        "Authorization": `Bearer ${token}`
+      }
+    })
       .then(response => response.json())
       .then(data => {
         // Mapeia os dados recebidos e seta no estado doencas
