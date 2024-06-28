@@ -16,6 +16,7 @@ function ResponsavelAdd({ id, onSearch }) {
   const [pacientes, setPacientes] = useState([]);
   const [showTitle, setShowTitle] = useState(true);
 
+  const token = localStorage.getItem('token');
 
   const ufs = [
     "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -24,18 +25,29 @@ function ResponsavelAdd({ id, onSearch }) {
   ];
 
   useEffect(() => {
-    if (id !== "") {
-      onSearch(updateValues);
-      setShowTitle(false);
-    } else {
-      setShowTitle(true);
-    }
+    // if (id !== "") {
+    //   onSearch(updateValues);
+    //   setShowTitle(false);
+    // } else {
+    //   setShowTitle(true);
+    // }
+
+    fetch(`http://localhost:3000/responsaveis/id/${id}`, {
+      headers:{
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => updateValues(data))
+      .catch(error => console.error('Erro ao buscar responsaveis:', error));
+
+
+
     fetchPacientes();
-  }, [id]);
+  }, []);
 
   const fetchPacientes = async () => {
-    try {
-      const token = localStorage.getItem('token'); // Recupere o token de onde estiver armazenado
+    try { // Recupere o token de onde estiver armazenado
   
       const response = await fetch("http://localhost:3000/pacientes", {
         headers: {
@@ -60,18 +72,17 @@ function ResponsavelAdd({ id, onSearch }) {
   
 
   const updateValues = (data) => {
-    let d = data;
-    setNome(d.nome);
-    setSobrenome(d.sobrenome);
-    setCpf(d.cpf);
-    setRG(d.rg);
-    setCidade(d.cidade);
-    setBairro(d.bairro);
-    setEndereco(d.endereco);
-    setNumero(d.numero);
-    setUf(d.uf);
-    setCep(d.cep);
-    setPacienteNome(d.paciente ? `${d.paciente.nome} ${d.paciente.sobrenome}` : "");
+    setNome(data.nome);
+    setSobrenome(data.sobrenome);
+    setCpf(data.cpf);
+    setRG(data.rg);
+    setCidade(data.cidade);
+    setBairro(data.bairro);
+    setEndereco(data.endereco);
+    setNumero(data.numero);
+    setUf(data.uf);
+    setCep(data.cep);
+    setPacienteNome(data.paciente ? `${data.paciente.nome} ${data.paciente.sobrenome}` : "");
   };
 
   const handleSubmit = async (e) => {
@@ -86,6 +97,7 @@ function ResponsavelAdd({ id, onSearch }) {
         method: method,
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           nome, sobrenome, cpf, rg, pacienteId: selectedPaciente ? selectedPaciente.id : null,

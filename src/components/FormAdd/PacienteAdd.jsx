@@ -56,14 +56,21 @@ function PacienteAdd({ id, onSearch }) {
   ];
 
   useEffect(() => {
-    if (id !== "") {
-      onSearch(updateValues);
-      setShowTitle(false);
-    } else {
-      setShowTitle(true);
-    }
+    
     
     const token = localStorage.getItem('token')
+
+    fetch(`http://localhost:3000/pacientes/id/${id}`, {
+      headers:{
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => updateValues(data))
+      .catch(error => console.error('Erro ao buscar pacientes:', error));
+
+
+
 
     // Fetch das doenças
     fetch('http://localhost:3000/doencas', {
@@ -87,6 +94,7 @@ function PacienteAdd({ id, onSearch }) {
   }, []);
 
   const updateValues = (data) => {
+    console.log(data);
     setNome(data.nome);
     setSobrenome(data.sobrenome);
     setCpf(data.cpf);

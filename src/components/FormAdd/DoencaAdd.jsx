@@ -5,6 +5,7 @@ function DoencaAdd({ id, onSearch }){
     
     const [doenca, setDoenca] = useState('');
     const [showTitle, setShowTitle] = useState(false);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         if(id !== ''){
@@ -13,11 +14,21 @@ function DoencaAdd({ id, onSearch }){
         } else {
             setShowTitle(true);
         }
+
+
+
+        fetch(`http://localhost:3000/doencas/id/${id}`, {
+            headers:{
+              "Authorization": `Bearer ${token}`
+            }
+          })
+            .then(response => response.json())
+            .then(data => updateValues(data))
+            .catch(error => console.error('Erro ao buscar pacientes:', error));
     }, [])
 
     const updateValues = (data) => {
-        let d = data[0];
-        setDoenca(d.nome);
+        setDoenca(data.nome);
     }
 
     const handleSubmit = async (doenca) => {
@@ -34,8 +45,6 @@ function DoencaAdd({ id, onSearch }){
         }
 
         try {
-
-            const token = localStorage.getItem('token');
 
             const response = await fetch(url, {
                 method: method,
