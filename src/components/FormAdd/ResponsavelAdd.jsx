@@ -114,6 +114,38 @@ function ResponsavelAdd({ id, onSearch }) {
     }
   };
 
+  // Autocompletar com ViaCep
+  const checkCEP = async (event) => {
+    const cepValue = event.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+    setCep(cepValue);
+  
+    if (cepValue.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepValue}/json/`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && !data.erro) {
+            setEndereco(data.logradouro);
+            setBairro(data.bairro);
+            setCidade(data.localidade);
+            setUf(data.uf);
+          } else {
+            setEndereco("");
+            setBairro("");
+            setCidade("");
+            setUf("");
+            alert('CEP não encontrado');
+          }
+        } else {
+          alert('Erro ao buscar o CEP');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar o CEP:', error);
+      }
+    }
+  };
+  
+
   return (
     <div className="max-w-3xl mx-auto">
       <form className="w-full">
@@ -222,7 +254,7 @@ function ResponsavelAdd({ id, onSearch }) {
               <InputMask
                 mask="99999-999"
                 value={cep}
-                onChange={(e) => setCep(e.target.value)}
+                onChange={checkCEP}
                 className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 id="input-cep"
                 type="text"
