@@ -8,35 +8,38 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-        const response = await fetch("http://localhost:3000/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: username, senha: password }),
-        });
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: username, senha: password }),
+      });
 
-        if (!response.ok) {
-            throw new Error("Invalid username or password");
-        }
+      if (!response.ok) {
+        throw new Error("Invalid username or password");
+      }
 
-        const { mensagem, token } = await response.json();
-        if (mensagem === 'Login feito com sucesso') {
-            localStorage.setItem('token', token); // Armazenar token
-            window.location.href = "http://localhost:5173/pacientes"; // Redireciona para a página de pacientes
-        } else {
-            setError(mensagem);
-        }
+      const { mensagem, token, nome } = await response.json();
+      if (mensagem === "Login feito com sucesso") {
+        localStorage.setItem("token", token);
+        localStorage.setItem("nomeUsuario", nome); // Armazenar token
+        window.location.href = "http://localhost:5173/pacientes"; // Redireciona para a página de pacientes
+      } else {
+        setError(mensagem);
+      }
     } catch (err) {
-        setError(err.message);
+      setError(err.message);
     }
-};
-
+  };
 
   const handleLogout = async () => {
     try {
-      await fetch("/logout", { method: "POST" });
-      localStorage.removeItem("token"); // Remove token from local storage
+      await fetch("http://localhost:3000/api/usuarios/logout", {
+        method: "POST",
+      });
+      localStorage.removeItem("token"); // Remove token do localStorage
+      localStorage.removeItem("nomeUsuario"); // Remove nome do usuário do localStorage
       setIsLoggedIn(false);
     } catch (err) {
       console.error("Error logging out:", err);
