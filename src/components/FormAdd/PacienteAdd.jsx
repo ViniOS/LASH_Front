@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import InputMask from "react-input-mask";
 import validator from "validator";
+import { toast, ToastContainer } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 
 function PacienteAdd({ id, onSearch }) {
@@ -54,6 +55,20 @@ function PacienteAdd({ id, onSearch }) {
     "SE",
     "TO",
   ];
+
+  const resetFields = () => {
+    setNome("");
+    setSobrenome("");
+    setCpf("");
+    setCidade("");
+    setCep("");
+    setUf("");
+    setBairro("");
+    setEndereco("");
+    setNumero("");
+    setDoenca("");
+    setDataNascimento("");
+  };
 
   useEffect(() => {
     
@@ -191,6 +206,8 @@ function PacienteAdd({ id, onSearch }) {
       });
 
       if (response.ok) {
+        resetFields();
+        toast.success("Dados enviados com sucesso!");
         console.log("Dados enviados com sucesso!");
       } else {
         const errorData = await response.json();
@@ -225,10 +242,10 @@ function PacienteAdd({ id, onSearch }) {
             setBairro("");
             setCidade("");
             setUf("");
-            alert('CEP não encontrado');
+            toast.error('CEP não encontrado!')
           }
         } else {
-          alert('Erro ao buscar o CEP');
+          toast.error('Erro ao buscar CEP!')
         }
       } catch (error) {
         console.error('Erro ao buscar o CEP:', error);
@@ -238,6 +255,7 @@ function PacienteAdd({ id, onSearch }) {
 
   return (
     <div>
+      <ToastContainer />
       <form className="w-full max-w-lg">
         <div className="flex flex-wrap -mx-3 mb-6">
           {showTitle && (

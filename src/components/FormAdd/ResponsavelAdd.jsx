@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import InputMask from "react-input-mask";
+import { toast, ToastContainer } from "react-toastify";
 
 function ResponsavelAdd({ id, onSearch }) {
   const [nome, setNome] = useState("");
@@ -17,6 +18,20 @@ function ResponsavelAdd({ id, onSearch }) {
   const [showTitle, setShowTitle] = useState(true);
 
   const token = localStorage.getItem('token');
+
+  const resetFields = () => {
+    setNome("");
+    setSobrenome("");
+    setCpf("");
+    setRG("");
+    setCidade("");
+    setCep("");
+    setUf("");
+    setBairro("");
+    setEndereco("");
+    setNumero("");
+    setPacienteNome("");
+  };
 
   const ufs = [
     "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -105,7 +120,9 @@ function ResponsavelAdd({ id, onSearch }) {
         }),
       });
       if (response.ok) {
-        // Handle success
+        resetFields();
+        toast.success("Dados enviados com sucesso!");
+        console.log("Dados enviados com sucesso!");
       } else {
         // Handle error
       }
@@ -134,10 +151,10 @@ function ResponsavelAdd({ id, onSearch }) {
             setBairro("");
             setCidade("");
             setUf("");
-            alert('CEP não encontrado');
+            toast.error('CEP não encontrado!')
           }
         } else {
-          alert('Erro ao buscar o CEP');
+          toast.error('Erro ao buscar CEP!')
         }
       } catch (error) {
         console.error('Erro ao buscar o CEP:', error);
@@ -148,6 +165,7 @@ function ResponsavelAdd({ id, onSearch }) {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <ToastContainer></ToastContainer>
       <form className="w-full">
         <div className="flex flex-wrap -mx-3 mb-6">
           <div className="my-8 w-full">
